@@ -2,8 +2,13 @@ package sat_solver;
 public class SAT_solver {
     public static void main(String[] args) {
         
-        MakeCNF a = new MakeCNF();
-        String b = "~~p&~(q&~(p&~r)&s|~~p)|~s";
-        System.out.println(a.makeCNF(b));    
+        String b = "p|(q&r)";
+        MakeCNF a = new MakeCNF(b);
+        System.out.print(a.makeCNF());
+        
+//        a.Bijection();
+//        a.Implication();
+        
+        //System.out.println(a.makeCNF(b));    
     }
 }

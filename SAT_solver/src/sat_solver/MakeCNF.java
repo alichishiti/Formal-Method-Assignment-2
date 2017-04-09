@@ -9,14 +9,27 @@ public class MakeCNF {
     private boolean unary;
     private char element;
     private int bracket;
+    private String expression;
+    private String updatedString;
 
     public MakeCNF() {
         this.unary = true;
         this.binary = false;
         this.alphabet = true;
         this.bracket = 0;
-        this.binaryOperators = new char[]{'&', '|', '>', '=', '<'};
+        this.binaryOperators = new char[]{'&', '|', '>', '='};
         this.unaryOperator = '~';
+    }
+
+    public MakeCNF(String expression) {
+        this.unary = true;
+        this.binary = false;
+        this.alphabet = true;
+        this.bracket = 0;
+        this.binaryOperators = new char[]{'&', '|', '>', '='};
+        this.unaryOperator = '~';
+        this.expression = expression;
+        updatedString = expression;
     }
 
     public boolean syntax(String expression) {
@@ -65,7 +78,6 @@ public class MakeCNF {
     private boolean isAlphabet(char element) {
         return Character.isLetter(element);
     }
-
     private boolean isBinaryOperator(char element) {
         for (int i = 0; i < this.binaryOperators.length; i++) {
             if (this.binaryOperators[i] == element) {
@@ -75,74 +87,118 @@ public class MakeCNF {
         return false;
     }
 
-    /*
-    public String insertBraces(String expression){
-        String s;
-        s = negationCheck(expression);
-        s = andCheck(s);
-        return s;
-    }
-    
-    private String negationCheck(String e){
-        String result = "";
-        char element2;
-        boolean insert = false;
-        boolean disable = false;
-        int search = 0;
-        for (int i = 0; i < e.length(); i++) {
-            this.element = e.charAt(i);
-            
-            if(disable){
-                disable = false;
-                continue;
-            }
-            
-            if(this.element != '~'){
-                result += this.element;
-            }
-            else
-                if(this.element == '~'){
-                    result += '(';
-                    result += this.element;
-                    element2 = e.charAt(i+1);
-                    if(element2 != '('){
-                        if(element2 == '~'){
-                            disable = true;
-                            result = result.substring(0, result.length()-2);
-                        }
-                        else
-                            insert = true;
-                        continue;
-                    }
-                    else
-                        if(element2 == '(')
-                            search += 1;
-                            continue;
-                }
-                        
-            if((insert == true) || ((search > 0) && (this.element == ')'))){
-                result += ')';
-                if(insert)insert = false;
-                else search -= 1;
-            }
+    public void Bijection(){
+        for (int i = 0; i < expression.length(); i++) {
+            if (expression.charAt(i) == '=')
+                handleBijection(i);
         }
-        return result;
     }
-     */
-    public String makeCNF(String e) {
-        String se = checkNegation(e);
-        return se;
+    public void Implication() {
+        for (int i = 0; i < expression.length(); i++) {
+            if (expression.charAt(i) == '>')
+                handleImplication(i);
+        }
     }
 
-    private String checkNegation(String e) {
+    public void handleBijection(int index) {
+        String leftSide ="";
+        String midLeft ="";
+        String rightSide ="";
+        String midRight ="";
+
+            for (int i = index-1; i >= 0; i--) {
+                if (expression.charAt(i) == ')')
+                    this.bracket++;
+                else if (expression.charAt(i) == '(')
+                    this.bracket--;
+
+                if (this.bracket == 0) {
+                    leftSide = expression.substring(0, i);
+                    midLeft = expression.substring(i, index);
+                    break;
+                }
+                
+            }
+            
+            for (int i = index+1; i < this.expression.length(); i++) {
+                if (expression.charAt(i) == '(') 
+                    this.bracket++;
+                else if (expression.charAt(i) == ')') 
+                    this.bracket--;
+                 
+                if (this.bracket == 0) {
+                    rightSide = expression.substring(i+1, expression.length());
+                    midRight = expression.substring(index+1, i+1);
+                    break;
+                }
+            }            
+            this.updatedString =  leftSide + '(' + midLeft + ">" + midRight + ")&(" + midRight + ">" + midLeft  + ')' + rightSide;
+            this.expression= this.updatedString;
+        }
+    
+    private void handleImplication(int index) {
+
+        String leftSide ="";
+        String midLeft ="";
+        String rightSide ="";
+        String midRight ="";
+
+            for (int i = index-1; i >= 0; i--) {
+                if (expression.charAt(i) == ')')
+                    this.bracket++;
+                else if (expression.charAt(i) == '(')
+                    this.bracket--;
+
+                if (this.bracket == 0) {
+                    leftSide = expression.substring(0, i);
+                    midLeft = expression.substring(i, index);
+                    break;
+                }
+                
+            }
+            
+            for (int i = index+1; i < this.expression.length(); i++) {
+                if (expression.charAt(i) == '(') 
+                    this.bracket++;
+                else if (expression.charAt(i) == ')') 
+                    this.bracket--;
+                 
+                if (this.bracket == 0) {
+                    rightSide = expression.substring(i+1, expression.length());
+                    midRight = expression.substring(index+1, i+1);
+                    break;
+                }
+            }            
+            this.updatedString =  leftSide + "(~" + midLeft + "|" + midRight + ")" + rightSide;
+            this.expression= this.updatedString;
+
+    }
+
+    public String makeCNF() {
+
+        System.out.println(this.expression);
+
+        Bijection();
+        System.out.println(this.expression);
+
+        Implication();
+        System.out.println(this.expression);
+
+        checkNegation();
+        System.out.println(this.expression);
+
+        return this.expression;
+    }
+
+    private void checkNegation() {
         char nextElement;
         boolean disable = false;
         int applyNegation = 0;
         String result = "";
         this.bracket = 0;
 
-        for (int i = 0; i < e.length(); i++) {
-            this.element = e.charAt(i);
+        for (int i = 0; i < this.expression.length(); i++) {
+            this.element = this.expression.charAt(i);
 
             if (disable) {
                 disable = false;
@@ -150,49 +206,45 @@ public class MakeCNF {
             }
 
             if ((this.element != '~') && ((applyNegation % 2) == 0)) {
-                if (this.element == ')') 
-                        applyNegation--;
+                if (this.element == ')') {
+                    applyNegation--;
+                }
                 result += this.element;
-            } 
-            else if ((this.element != '~') && ((applyNegation % 2) == 1)) {
+            } else if ((this.element != '~') && ((applyNegation % 2) == 1)) {
                 if (isAlphabet(this.element)) {
                     result += '~';
                     result += this.element;
-                }
-                else if (isBinaryOperator(this.element)) {
-                    if (this.element == '&')
+                } else if (isBinaryOperator(this.element)) {
+                    if (this.element == '&') {
                         result += '|';
-                    else
+                    } else {
                         result += '&';
-                } 
-                else {
-                    if (this.element == ')')
+                    }
+                } else {
+                    if (this.element == ')') {
                         applyNegation--;
+                    }
                     result += this.element;
                 }
-            } 
-            
-            else if (this.element == '~') {
-                nextElement = e.charAt(i + 1);
+            } else if (this.element == '~') {
+                nextElement = this.expression.charAt(i + 1);
                 if (nextElement == '~') {
                     disable = true;
                     continue;
                 } else if (nextElement == '(') {
                     applyNegation++;
-                    System.out.println(applyNegation);
                     continue;
-                }
-                else if ((applyNegation % 2) == 1){
+                } else if ((applyNegation % 2) == 1) {
                     result += nextElement;
                     disable = true;
                     continue;
-                }
-                else
+                } else {
                     result += this.element;
+                }
             }
         }
 
-        return result;
+        this.expression = result;
     }
 
 }
